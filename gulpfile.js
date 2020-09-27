@@ -71,7 +71,7 @@ const paths = {
 // Plugin configurations.
 // Use an empty object for empty configurations.
 const pluginConfig = {
-  autoprefixer: { browsers: ['last 2 versions'] },
+  autoprefixer: { overrideBrowserslist: ['last 2 versions'] },
   browserSync: {
     port: process.env.PORT || 3000,
     server: { baseDir: `${dirs.output}` },
@@ -93,7 +93,7 @@ const pluginConfig = {
   },
   imagemin: [
     imagemin.gifsicle({ interlaced: true, optimizationLevel: 3 }),
-    imagemin.jpegtran({ progressive: true }),
+    imagemin.mozjpeg({ progressive: true }),
     imagemin.optipng({ optimizationLevel: 7 }),
     imagemin.svgo({
       plugins: [{ removeUselessDefs: false }, { cleanupIDs: false }],
