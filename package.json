@@ -1,6 +1,6 @@
 {
   "name": "gulp-nunjucks-boilerplate",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "A scalable Gulp generated Nunjucks boilerplate.",
   "license": "MIT",
   "author": "Michael Schwobe <mschwobe@gmail.com> (http://michaelschwobe.com)",
@@ -29,11 +29,6 @@
   "scripts": {
     "start": "gulp",
     "build": "NODE_ENV=production gulp",
-    "build:public": "NODE_ENV=production gulp public",
-    "build:views": "NODE_ENV=production gulp views",
-    "build:media": "NODE_ENV=production gulp media",
-    "build:styles": "NODE_ENV=production gulp styles",
-    "build:scripts": "NODE_ENV=production gulp scripts",
     "clean": "gulp clean"
   },
   "dependencies": {
@@ -50,7 +45,7 @@
     "browser-sync": "^2.26.12",
     "del": "^6.0.0",
     "fs": "^0.0.1-security",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.2",
     "gulp-autoprefixer": "^7.0.1",
     "gulp-changed": "^4.0.2",
     "gulp-clean-css": "^4.3.0",
@@ -63,7 +58,6 @@
     "gulp-plumber": "^1.2.1",
     "gulp-sass": "^4.1.0",
     "gulp-sourcemaps": "^2.6.5",
-    "run-sequence": "^2.2.1",
     "vinyl-named": "^1.1.0",
     "webpack": "^4.44.2",
     "webpack-stream": "^6.1.0"

@@ -1,41 +1,40 @@
-'use strict';
+"use strict";
 
-const autoprefixer = require('gulp-autoprefixer');
-const browserSync = require('browser-sync').create();
-const changed = require('gulp-changed');
-const cleanCSS = require('gulp-clean-css');
-const data = require('gulp-data');
-const del = require('del');
-const fs = require('fs');
-const gulp = require('gulp');
-const htmlmin = require('gulp-htmlmin');
-const imagemin = require('gulp-imagemin');
-const MinifyPlugin = require('babel-minify-webpack-plugin');
-const named = require('vinyl-named');
-const noop = require('gulp-noop');
-const notify = require('gulp-notify');
-const nunjucksRender = require('gulp-nunjucks-render');
-const plumber = require('gulp-plumber');
-const runSequence = require('run-sequence');
-const sass = require('gulp-sass');
-const sourcemaps = require('gulp-sourcemaps');
-const webpack = require('webpack-stream');
+const autoprefixer = require("gulp-autoprefixer");
+const browserSync = require("browser-sync").create();
+const changed = require("gulp-changed");
+const cleanCSS = require("gulp-clean-css");
+const data = require("gulp-data");
+const del = require("del");
+const fs = require("fs");
+const { src, dest, watch, series, parallel } = require("gulp");
+const htmlmin = require("gulp-htmlmin");
+const imagemin = require("gulp-imagemin");
+const MinifyPlugin = require("babel-minify-webpack-plugin");
+const named = require("vinyl-named");
+const noop = require("gulp-noop");
+const notify = require("gulp-notify");
+const nunjucksRender = require("gulp-nunjucks-render");
+const plumber = require("gulp-plumber");
+const sass = require("gulp-sass");
+const sourcemaps = require("gulp-sourcemaps");
+const webpack = require("webpack-stream");
 
 // Local
-const packageJson = require('./package.json');
+const packageJson = require("./package.json");
 
 //------------------------------------------------------------------------------
 // Configuration.
 //------------------------------------------------------------------------------
 
 // Environment configuration.
-const isProd = process.env.NODE_ENV === 'production';
+const isProd = process.env.NODE_ENV === "production";
 
 // Directory configuration.
 // Must have values, don't use leading or trailing slashes.
 const dirs = {
-  entry: 'src',
-  output: 'build',
+  entry: "src",
+  output: "build",
 };
 
 // Path configuration.
@@ -71,7 +70,7 @@ const paths = {
 // Plugin configurations.
 // Use an empty object for empty configurations.
 const pluginConfig = {
-  autoprefixer: { overrideBrowserslist: ['last 2 versions'] },
+  autoprefixer: { overrideBrowserslist: ["last 2 versions"] },
   browserSync: {
     port: process.env.PORT || 3000,
     server: { baseDir: `${dirs.output}` },
@@ -105,10 +104,10 @@ const pluginConfig = {
       isProd,
       version: packageJson.version,
       paths: {
-        root: isProd ? 'https://example.com' : '',
-        scripts: '/static/scripts',
-        styles: '/static/styles',
-        media: '/static/media',
+        root: isProd ? "https://example.com" : "",
+        scripts: "/static/scripts",
+        styles: "/static/styles",
+        media: "/static/media",
       },
     },
     envOptions: {
@@ -123,27 +122,28 @@ const pluginConfig = {
     errorHandler(...args) {
       notify
         .onError({
-          title: 'Compile Error',
-          message: '<%= error.message %>',
-          sound: 'Funk',
+          title: "Compile Error",
+          message: "<%= error.message %>",
+          sound: "Funk",
         })
         .apply(this, args);
-      this.emit('end');
+      this.emit("end");
     },
   },
   sass: {
-    outputStyle: 'expanded',
-    includePaths: ['node_modules'],
+    outputStyle: "expanded",
+    includePaths: ["node_modules"],
   },
-  sourcemaps: '.',
+  sourcemaps: ".",
   webpack: {
-    devtool: isProd ? 'cheap-source-map' : 'cheap-eval-source-map',
+    devtool: isProd ? "cheap-source-map" : "cheap-eval-source-map",
+    mode: isProd ? "production" : "development",
     module: {
       rules: [
         {
           test: /\.js$/,
-          loader: 'babel-loader',
-          options: { presets: ['env'] },
+          loader: "babel-loader",
+          options: { presets: ["env"] },
         },
       ],
     },
@@ -155,44 +155,44 @@ const pluginConfig = {
 // Public.
 // -----------------------------------------------------------------------------
 
-gulp.task('public', () =>
-  gulp
-    // Input.
-    .src(paths.public.src)
-    // Report errors.
-    .pipe(plumber(pluginConfig.plumber))
-    // Production: Do nothing.
-    // Development: Pipe only changed files to the next process.
-    .pipe(isProd ? noop() : changed(paths.public.dest))
-    // Output.
-    .pipe(gulp.dest(paths.public.dest))
-    // Production: Do nothing.
-    // Development: Stream changes back to 'watch' tasks.
-    .pipe(isProd ? noop() : browserSync.stream()),
-);
+const publicTask = function () {
+  return (
+    src(paths.public.src)
+      // Report errors.
+      .pipe(plumber(pluginConfig.plumber))
+      // Production: Do nothing.
+      // Development: Pipe only changed files to the next process.
+      .pipe(isProd ? noop() : changed(paths.public.dest))
+      // Output.
+      .pipe(dest(paths.public.dest))
+      // Production: Do nothing.
+      // Development: Stream changes back to 'watch' tasks.
+      .pipe(isProd ? noop() : browserSync.stream())
+  );
+};
 
 // -----------------------------------------------------------------------------
 // Views.
 // -----------------------------------------------------------------------------
 
-const getJSONFile = slug => {
+const getJSONFile = (slug) => {
   // Read Buffer from file.
   const fileData = fs.readFileSync(`${paths.views.root}/${slug}.json`);
   // Convert Buffer to JSON.
   return JSON.parse(fileData);
 };
 
-const getPageId = file =>
+const getPageId = (file) =>
   file.relative
     // Convert slashes to dashes.
-    .replace(/\//, '-')
+    .replace(/\//, "-")
     // Remove extension.
-    .replace(/\.[^/.]+$/, '');
+    .replace(/\.[^/.]+$/, "");
 
-const getDataForFile = file => {
+const getDataForFile = (file) => {
   const id = getPageId(file);
   // Get global data.
-  const jsonData = { ...getJSONFile('data') };
+  const jsonData = { ...getJSONFile("data") };
   // Extract and assign page data.
   jsonData.page = { id, ...jsonData.pages[id] };
   // Remove redundant data.
@@ -201,94 +201,94 @@ const getDataForFile = file => {
   return jsonData;
 };
 
-gulp.task('views', () =>
-  gulp
-    // Input.
-    .src(paths.views.src)
-    // Report errors.
-    .pipe(plumber(pluginConfig.plumber))
-    // Pass data to templates.
-    .pipe(data(getDataForFile))
-    // Compile (un)changed templates.
-    .pipe(nunjucksRender(pluginConfig.nunjucksRender))
-    // Production: Minify.
-    // Development: Do Nothing.
-    .pipe(isProd ? htmlmin(pluginConfig.htmlmin) : noop())
-    // Output.
-    .pipe(gulp.dest(paths.views.dest)),
-);
+const views = function () {
+  return (
+    src(paths.views.src)
+      // Report errors.
+      .pipe(plumber(pluginConfig.plumber))
+      // Pass data to templates.
+      .pipe(data(getDataForFile))
+      // Compile (un)changed templates.
+      .pipe(nunjucksRender(pluginConfig.nunjucksRender))
+      // Production: Minify.
+      // Development: Do Nothing.
+      .pipe(isProd ? htmlmin(pluginConfig.htmlmin) : noop())
+      // Output.
+      .pipe(dest(paths.views.dest))
+  );
+};
 
 //------------------------------------------------------------------------------
 // Media.
 //------------------------------------------------------------------------------
 
-gulp.task('media', () =>
-  gulp
-    // Input.
-    .src(paths.media.src)
-    // Report errors.
-    .pipe(plumber(pluginConfig.plumber))
-    // Production: Do nothing.
-    // Development: Pipe only changed files to the next process.
-    .pipe(isProd ? noop() : changed(paths.media.dest))
-    // Production: Optimize.
-    // Development: Do Nothing.
-    .pipe(isProd ? imagemin(pluginConfig.imagemin) : noop())
-    // Output.
-    .pipe(gulp.dest(paths.media.dest))
-    // Production: Do nothing.
-    // Development: Stream changes back to 'watch' tasks.
-    .pipe(isProd ? noop() : browserSync.stream()),
-);
+const media = function () {
+  return (
+    src(paths.media.src)
+      // Report errors.
+      .pipe(plumber(pluginConfig.plumber))
+      // Production: Do nothing.
+      // Development: Pipe only changed files to the next process.
+      .pipe(isProd ? noop() : changed(paths.media.dest))
+      // Production: Optimize.
+      // Development: Do Nothing.
+      .pipe(isProd ? imagemin(pluginConfig.imagemin) : noop())
+      // Output.
+      .pipe(dest(paths.media.dest))
+      // Production: Do nothing.
+      // Development: Stream changes back to 'watch' tasks.
+      .pipe(isProd ? noop() : browserSync.stream())
+  );
+};
 
 //------------------------------------------------------------------------------
 // Styles.
 //------------------------------------------------------------------------------
 
-gulp.task('styles', () =>
-  gulp
-    // Input.
-    .src(paths.styles.src)
-    // Report errors.
-    .pipe(plumber(pluginConfig.plumber))
-    // Production: Do nothing.
-    // Development: Pipe only changed files to the next process.
-    .pipe(isProd ? noop() : changed(paths.styles.dest))
-    // Start mapping original source.
-    .pipe(sourcemaps.init())
-    // Convert to CSS.
-    .pipe(sass(pluginConfig.sass))
-    // Add browser compatibility.
-    .pipe(autoprefixer(pluginConfig.autoprefixer))
-    // Production: Minify.
-    // Development: Do nothing.
-    .pipe(isProd ? cleanCSS(...pluginConfig.cleanCSS) : noop())
-    // Save mapping for easier debugging.
-    .pipe(sourcemaps.write(pluginConfig.sourcemaps))
-    // Output.
-    .pipe(gulp.dest(paths.styles.dest))
-    // Production: Do nothing.
-    // Development: Stream changes back to 'watch' tasks.
-    .pipe(isProd ? noop() : browserSync.stream()),
-);
+const styles = function () {
+  return (
+    src(paths.styles.src)
+      // Report errors.
+      .pipe(plumber(pluginConfig.plumber))
+      // Production: Do nothing.
+      // Development: Pipe only changed files to the next process.
+      .pipe(isProd ? noop() : changed(paths.styles.dest))
+      // Start mapping original source.
+      .pipe(sourcemaps.init())
+      // Convert to CSS.
+      .pipe(sass(pluginConfig.sass))
+      // Add browser compatibility.
+      .pipe(autoprefixer(pluginConfig.autoprefixer))
+      // Production: Minify.
+      // Development: Do nothing.
+      .pipe(isProd ? cleanCSS(...pluginConfig.cleanCSS) : noop())
+      // Save mapping for easier debugging.
+      .pipe(sourcemaps.write(pluginConfig.sourcemaps))
+      // Output.
+      .pipe(dest(paths.styles.dest))
+      // Production: Do nothing.
+      // Development: Stream changes back to 'watch' tasks.
+      .pipe(isProd ? noop() : browserSync.stream())
+  );
+};
 
 //------------------------------------------------------------------------------
 // Scripts.
 //------------------------------------------------------------------------------
 
-gulp.task('scripts', () =>
-  gulp
-    // Input.
-    .src(paths.scripts.src)
-    // Report errors.
-    .pipe(plumber(pluginConfig.plumber))
-    // Automatically pass named chunks to webpack.
-    .pipe(named())
-    // Bundle.
-    .pipe(webpack(pluginConfig.webpack))
-    // Output.
-    .pipe(gulp.dest(paths.scripts.dest)),
-);
+const scripts = function () {
+  return (
+    src(paths.scripts.src)
+      // Report errors.
+      .pipe(plumber(pluginConfig.plumber))
+      // Automatically pass named chunks to webpack.
+      .pipe(named())
+      // Bundle.
+      .pipe(webpack(pluginConfig.webpack))
+      // Output.
+      .pipe(dest(paths.scripts.dest))
+  );
+};
 
 //------------------------------------------------------------------------------
 // Serve.
@@ -296,52 +296,64 @@ gulp.task('scripts', () =>
 
 // Development.
 // Starts the browserSync server.
-gulp.task('serve', () => browserSync.init(pluginConfig.browserSync));
+const serve = function () {
+  browserSync.init(pluginConfig.browserSync);
+};
 
 //------------------------------------------------------------------------------
 // Watch.
 //------------------------------------------------------------------------------
 
-// Ensures the 'views' task is complete before reloading browsers.
-gulp.task('views:watch', ['views'], done => {
-  browserSync.reload();
-  done();
-});
-
-// Ensures the 'scripts' task is complete before reloading browsers.
-gulp.task('scripts:watch', ['scripts'], done => {
-  browserSync.reload();
-  done();
-});
-
 // Development.
 // Watches files for changes.
-gulp.task('watch', () => {
-  gulp.watch(paths.public.src, ['public']);
-  gulp.watch(paths.views.watch, ['views:watch']);
-  gulp.watch(paths.media.src, ['media']);
-  gulp.watch(paths.styles.src, ['styles']);
-  gulp.watch(paths.scripts.src[0], ['scripts:watch']);
-});
+const watchTasks = function () {
+  watch(paths.public.src, publicTask);
+  // Ensures the 'views' task is complete before reloading browsers.
+  watch(
+    paths.views.watch,
+    series(views, (done) => {
+      browserSync.reload();
+      done();
+    })
+  );
+  watch(paths.media.src, media);
+  watch(paths.styles.src, styles);
+  // Ensures the 'scripts' task is complete before reloading browsers.
+  watch(
+    paths.scripts.src[0],
+    series(scripts, (done) => {
+      browserSync.reload();
+      done();
+    })
+  );
+};
 
 //------------------------------------------------------------------------------
 // Clean.
 //------------------------------------------------------------------------------
 
 // Deletes the output folder.
-gulp.task('clean', () => del([dirs.output]));
+const clean = function (cb) {
+  return del([dirs.output]);
+};
+
+exports.clean = clean;
 
 //------------------------------------------------------------------------------
 // Default.
 //------------------------------------------------------------------------------
 
-gulp.task('default', callback => {
-  const compile = ['public', 'views', 'media', 'styles', 'scripts'];
-  if (isProd) {
-    // Production.
-    runSequence('clean', compile, callback);
-  } else {
+const defaultTask = function () {
+  const compile = parallel(views, media, styles, scripts);
+  // Production.
+  const tasks = [clean, publicTask, compile];
+
+  if (!isProd) {
     // Development.
-    runSequence('clean', compile, 'serve', 'watch', callback);
+    tasks.push(parallel(serve, watchTasks));
   }
-});
+
+  return series(tasks);
+};
+
+exports.default = defaultTask();

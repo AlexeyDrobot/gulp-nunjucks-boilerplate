@@ -4,19 +4,19 @@
 
 __Includes:__
 
-- Nunjucks/HTML compilation.  
-- Image optimization (imagemin).  
-- CSS/Sass processing and minification (sourcemaps, autoprefixer, clean-css).  
-- JavaScript bundling and minification (webpack, babel-minify).  
-- Delivery folder generation - clean and ready for distribution to staging, production, etc.  
-- Fully configurable build process.  
+- Nunjucks/HTML compilation.
+- Image optimization (imagemin).
+- CSS/Sass processing and minification (sourcemaps, autoprefixer, clean-css).
+- JavaScript bundling and minification (webpack, babel-minify).
+- Delivery folder generation - clean and ready for distribution to staging, production, etc.
+- Fully configurable build process.
 
 ## Installation
 
 __Step 1:__ Add global packages to your computer.
 
-- Required: [node & npm](https://nodejs.org/), [gulp-cli](http://gulpjs.com/)  
-- Optional: [yarn](https://yarnpkg.com/)  
+- Required: [node & npm](https://nodejs.org/), [gulp-cli](http://gulpjs.com/)
+- Optional: [yarn](https://yarnpkg.com/)
 
 __Step 2:__ Install dependencies:
 
@@ -76,22 +76,4 @@ yarn build
 
 __Notes:__
 
-- Use a bang to avoid comments from being stripped out of stylesheets, ex: `/*! ... */`  
-- Individual production tasks can be run seperately, ex:  
-
-```sh
-# Move public files and (sub)folders.
-yarn build:public
-
-# Nunjucks compilation.
-yarn build:views
-
-# Image optimization.
-yarn build:media
-
-# CSS/Sass processing and minification.
-yarn build:styles
-
-# JavaScript bundling and minification.
-yarn build:scripts
-```
+- Use a bang to avoid comments from being stripped out of stylesheets, ex: `/*! ... */`
